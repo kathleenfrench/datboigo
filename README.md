@@ -4,4 +4,4 @@
 
 ## Secure The Bag 🚨 🚨 🚨 ## 
 
-![gameplay](assets/game.png?raw=true "game play")
+<img src="assets/game.png?raw=true" width="450" height="auto">
