@@ -103,31 +103,31 @@ test: dependencies ## Run tests
 	@echo "running tests..."
 	@$(GO) test -cover -vet all ./...
 
-.PHONY: build
-build: test ${PACKR} ${BUILD_OUTPUT_DIR} ## Performs a build only if tests pass
-	@echo "building for $(GOOS)_$(GOARCH)"
-	@packr
-	@cd $(CWD)/cmd/$(BIN_NAME) && \
-		export GOOS=$(GOOS) GOARCH=$(GOARCH) && \
-		export CGO_ENABLED=0 && \
-		export GITHUB_USER=$(GITHUB_USER) && \
-		$(GO) build ${GO_BUILD_FLAGS}
-		echo "binary compiled to $(BINARY_LOCATION)"
-	@cd $(CWD) && packr clean
+# .PHONY: build
+# build: test ${PACKR} ${BUILD_OUTPUT_DIR} ## Performs a build only if tests pass
+# 	@echo "building for $(GOOS)_$(GOARCH)"
+# 	@packr
+# 	@cd $(CWD)/cmd/$(BIN_NAME) && \
+# 		export GOOS=$(GOOS) GOARCH=$(GOARCH) && \
+# 		export CGO_ENABLED=0 && \
+# 		export GITHUB_USER=$(GITHUB_USER) && \
+# 		$(GO) build ${GO_BUILD_FLAGS}
+# 		echo "binary compiled to $(BINARY_LOCATION)"
+# 	@cd $(CWD) && packr clean
 
-.PHONY: install
-install: build
-	@echo "installing to ${INSTALL_LOCATION}"
-	cp ${BINARY_LOCATION} ${INSTALL_LOCATION}
+# .PHONY: install
+# install: build
+# 	@echo "installing to ${INSTALL_LOCATION}"
+# 	cp ${BINARY_LOCATION} ${INSTALL_LOCATION}
 
-.PHONY: run
+.PHONY: local_run
 run: dependencies
 	cd cmd/datboigo && go run **.go
 
-.PHONY: docker_build
-docker_build:
+.PHONY: build
+build:
 	docker build -t datboigo .
 
-.PHONY: docker_run
-docker_run:
+.PHONY: run
+run:
 	docker run -i -t datboigo
