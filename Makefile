@@ -85,7 +85,7 @@ ${BUILD_OUTPUT_DIR}:
 	@mkdir -p $(BUILD_OUTPUT_DIR)
 
 .PHONY: ensure_dep_version
-ensure_dep_version: ${DEP} ## Enforces that we have a copy of dep that matches the desired version
+ensure_dep_version: ${DEP}
 	@if [ '$(DEP_VERSION)' != '$(DESIRED_DEP_VERSION)' ]; then \
 		echo "wanted dep version $(DESIRED_DEP_VERSION), got $(DEP_VERSION)."; \
 		echo "installing $(DEP_URL)/dep-$(GOOS)-amd64 to $(DEP_INSTALL_LOCATION)."; \
@@ -103,31 +103,37 @@ test: dependencies ## Run tests
 	@echo "running tests..."
 	@$(GO) test -cover -vet all ./...
 
-# .PHONY: build
-# build: test ${PACKR} ${BUILD_OUTPUT_DIR} ## Performs a build only if tests pass
-# 	@echo "building for $(GOOS)_$(GOARCH)"
-# 	@packr
-# 	@cd $(CWD)/cmd/$(BIN_NAME) && \
-# 		export GOOS=$(GOOS) GOARCH=$(GOARCH) && \
-# 		export CGO_ENABLED=0 && \
-# 		export GITHUB_USER=$(GITHUB_USER) && \
-# 		$(GO) build ${GO_BUILD_FLAGS}
-# 		echo "binary compiled to $(BINARY_LOCATION)"
-# 	@cd $(CWD) && packr clean
+.PHONY: local_build
+local_build: test ${PACKR} ${BUILD_OUTPUT_DIR} ## Performs a local build only if tests pass
+	@echo "building for $(GOOS)_$(GOARCH)"
+	@packr
+	@cd $(CWD)/cmd/$(BIN_NAME) && \
+		export GOOS=$(GOOS) GOARCH=$(GOARCH) && \
+		export CGO_ENABLED=0 && \
+		export GITHUB_USER=$(GITHUB_USER) && \
+		$(GO) build ${GO_BUILD_FLAGS}
+		echo "binary compiled to $(BINARY_LOCATION)"
+	@cd $(CWD) && packr clean
 
-# .PHONY: install
-# install: build
-# 	@echo "installing to ${INSTALL_LOCATION}"
-# 	cp ${BINARY_LOCATION} ${INSTALL_LOCATION}
+.PHONY: local_install
+local_install: local_build ## local installation of the datboigo binary
+	@echo "installing to ${INSTALL_LOCATION}"
+	cp ${BINARY_LOCATION} ${INSTALL_LOCATION}
 
 .PHONY: local_run
-run: dependencies
+local_run: dependencies ## runs the raw go files, not the binary
 	cd cmd/datboigo && go run **.go
 
 .PHONY: build
-build:
+build: dependencies ## builds a docker image for the datboigo terminal game
 	docker build -t datboigo .
 
 .PHONY: run
-run:
+run: build ## runs the built docker image for the datboigo game
 	docker run -i -t datboigo
+
+.PHONY: help
+help: ## lists useful commands. other commands may be available, but are not generally useful for most purposes. read the Makefile for these additional commands.
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.DEFAULT_GOAL := help
