@@ -20,7 +20,7 @@ type Graphics struct {
 }
 
 func loadGraphics() error {
-	f, err := os.Open("graphics.json")
+	f, err := os.Open("./assets/graphics.json")
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func clearScreen() {
 }
 
 func loadMaze() error {
-	f, err := os.Open("maze.txt")
+	f, err := os.Open("./assets/maze.txt")
 	if err != nil {
 		return err
 	}
