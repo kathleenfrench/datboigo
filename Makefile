@@ -123,3 +123,11 @@ install: build
 .PHONY: run
 run: dependencies
 	cd cmd/datboigo && go run **.go
+
+.PHONY: docker_build
+docker_build:
+	docker build -t datboigo .
+
+.PHONY: docker_run
+docker_run:
+	docker run -i -t datboigo
